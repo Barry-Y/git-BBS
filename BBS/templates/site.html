@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+
+{% block content %}
+    <ul class="media-list">
+                    {% for article_obj in article_list %}
+                        <li class="media">
+                            <h4 class="media-heading"><a href="/{{ username }}/article/{{ article_obj.pk }}/">{{ article_obj.title }}</a></h4>
+                            <div class="media-left">
+                              <a href="#">
+                                <img class="media-object" src="/media/{{ article_obj.blog.userinfo.avatar }}/" alt="..." width="80px">
+                              </a>
+                            </div>
+                            <div class="media-body">
+                                {{ article_obj.desc }}
+                            </div>
+                            <br>
+                        {#posted @ 2021-12-20 20:26 路边两盏灯 阅读(9) 评论(0) 推荐(0) 编辑#}
+                            <div class="pull-right">
+                                <span>#possted&nbsp&nbsp</span>
+                                <span>@&nbsp&nbsp</span>
+                                <span>{{ article_obj.create_time|date:'Y-m-d'}}&nbsp&nbsp</span>
+                                <span>{{ article_obj.blog.userinfo.username }}&nbsp&nbsp</span>
+                                <span><span class="glyphicon glyphicon-comment"></span>评论数{{ article_obj.comment_num }}&nbsp&nbsp</span>
+                                <span><span class="glyphicon glyphicon-thumbs-up"></span>点赞数{{ article_obj.up_num }}&nbsp&nbsp</span>
+                                <span><a href="">编辑</a></span>
+                            </div>
+                        </li>
+                        {#每篇文章之间加分割线#}
+                        <hr>
+                    {% endfor %}
+                </ul>
+{% endblock %}

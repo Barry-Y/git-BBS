@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <link href="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdn.bootcdn.net/ajax/libs/twitter-bootstrap/3.4.1/js/bootstrap.min.js"></script>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-4 col-md-offset-4">
+                <h1 class="text-center">注册</h1>
+                <form id="myform">
+                    {% csrf_token %}
+                    {% for form in form_obj %}
+                        <div class="form-group">
+                            <label for="{{ form.auto_id }}">{{ form.label }}:</label>
+                            {{ form }}
+                            <span style="color: red"></span>
+                        </div>
+                    {% endfor %}
+                    <div class="form-group">
+                        <label for="myfile">头像
+                            {% load static %}
+                            <img src="{% static 'img/default.png' %}" alt="" id="myimg" title="头像" width="100px" style="margin-left: 20px">
+                        </label>
+                        {#隐藏上传文件的input框#}
+                        <input type="file" id="myfile" name="avatar" style="display: none">
+                    </div>
+                    <input type="button" class="btn btn-primary pull-right" value="注册" id="id_commit" >
+                </form>
+            </div>
+        </div>
+    </div>
+    <script>
+        //给上传头像绑定一个事件
+        $('#myfile').change(function (){
+            //先生成一个文件阅读器对象
+            let myFileReaderObj = new FileReader();
+            //获取用户上传的头像文件
+            let fileObj = $(this)[0].files[0];
+            //将文件对象交给文件阅读器对象读取
+            myFileReaderObj.readAsDataURL(fileObj)
+            //利用文件阅读器将文件展示到前端页面 修改src属性(attr)
+            //必须等到文件阅读器加载完毕之后在执行(onload)
+            myFileReaderObj.onload = function (){
+                $('#myimg').attr('src',myFileReaderObj.result)
+            }
+        })
+        //用ajax向后端发送文件
+        $('#id_commit').click(function (){
+            let formdata_obj = new FormData();
+            //添加普通键值对
+            //$('#myform').serializeArray()-->[{'name':'username','value':'xxx'},{},{}]
+            //利用jQuery的for循环
+            $.each($('#myform').serializeArray(),function (index,obj){
+                formdata_obj.append(obj.name,obj.value )
+            })
+            //添加文件
+            formdata_obj.append('avatar',$('#myfile')[0].files[0]);
+            $.ajax({
+                url:'',
+                type:'post',
+                data:formdata_obj,
+                //不设置数据传输的编码格式
+                contentType:false,
+                processData:false,
+                success:function (data){
+                    if (data.code == 1000){
+                        //注册成功跳转登陆页面
+                        window.location.href = data.url
+                    }else{
+                        //注册失败显示错误信息到对应的input框
+                        //每个input都有一个id='id_username'
+                        $.each(data.msg,function (index,obj){
+                            let target_id = '#id_'+ index
+                            //找到每个input框下到span标签设置错误信息,同时给该input到父标签加一个样式
+                            $(target_id).next().text(obj[0]).parent().addClass('has-error')
+                        })
+                    }
+                }
+            })
+        })
+    //给所有input绑定一个获取焦点事件
+    //鼠标悬浮在input框时，错误信息不展示，外框颜色变正常
+    $('input').focus(function (){
+        $(this).next().text('').parent().removeClass('has-error')
+    })
+    </script>
+</body>
+</html>
